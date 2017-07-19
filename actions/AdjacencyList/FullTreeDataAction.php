@@ -45,6 +45,7 @@ use yii\web\Response;
  * @property string $querySelectedAttribute
  * @property array $whereCondition
  * @property string $cacheKey
+ * @property boolean $cacheActive
  * @property string $cacheLifeTime
  * @property array $selectedNodes
  */
@@ -77,6 +78,8 @@ class FullTreeDataAction extends Action
      * @var string|\Closure
      */
     public $cacheKey = 'FullTree';
+
+    public $cacheActive = true;
 
     /**
      * Cache lifetime for the full tree
@@ -146,16 +149,18 @@ class FullTreeDataAction extends Action
                 $result[$row[$this->modelIdAttribute]] = $item;
             }
 
-            Yii::$app->cache->set(
-                $cacheKey,
-                $result,
-                $this->cacheLifeTime,
-                new TagDependency([
-                    'tags' => [
-                        NamingHelper::getCommonTag($class),
-                    ],
-                ])
-            );
+            if($this->cacheActive){ // Check activation cache
+                Yii::$app->cache->set(
+                    $cacheKey,
+                    $result,
+                    $this->cacheLifeTime,
+                    new TagDependency([
+                        'tags' => [
+                            NamingHelper::getCommonTag($class),
+                        ],
+                    ])
+                );
+            }
 
             Yii::endProfile('Build tree');
         }
