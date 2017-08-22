@@ -169,7 +169,7 @@ class TreeWidget extends Widget
             $this->contextMenuOptions($functionName);
         }
         $options = Json::encode($options);
-        $this->getView()->registerAssetBundle('devgroup\JsTreeWidget\widgets\JsTreeAssetBundle');
+        $this->getView()->registerAssetBundle('igor162\JsTreeWidget\widgets\JsTreeAssetBundle');
 
         $doubleClick = '';
         if ($this->doubleClickAction !== false) {
