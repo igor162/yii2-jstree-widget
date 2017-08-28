@@ -2,13 +2,18 @@
 
 namespace igor162\JsTreeWidget\actions\nestedset;
 
-use igor162\JsTreeWidget\widgets\TreeWidget;
+use Yii;
 use yii\base\Action;
 use yii\base\InvalidConfigException;
-use yii\db\ActiveRecord;
-use Yii;
 use yii\db\Query;
+use yii\db\ActiveRecord;
 use yii\web\Response;
+use yii\caching\TagDependency;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
+use yii\helpers\HtmlPurifier;
+
+use igor162\JsTreeWidget\widgets\TreeWidget;
 
 /**
  * Class FullTreeDataAction
@@ -115,13 +120,18 @@ class FullTreeDataAction extends Action
         foreach ($data as $row) {
             $currentRoot = isset($row[$this->rootAttribute]) ? $row[$this->rootAttribute] : 0;
             if (is_null($rgt) || $row[$this->rightAttribute] < $rgt && $root == $currentRoot) {
+                // Protection against xss
+//                $name = $row[$this->modelLabelAttribute];
+                $name = ArrayHelper::getValue($row, $this->modelLabelAttribute, 'item');
+                if(Html::encode($name) !== $name){ $name = HtmlPurifier::process($name); }
+
                 if ($lft + 1 == $row[$this->leftAttribute]) {
                     if ($row[$this->leftAttribute] + 1 !== $row[$this->rightAttribute]) {
                         $res[] = [
-                            'id' => $row['id'],
-                            'text' => $row[$this->modelLabelAttribute],
+                            'id' => (int)$row['id'],
+                            'text' => Html::encode($name),
                             'a_attr' => [
-                                'data-id' => $row['id'],
+                                'data-id' => (int)$row['id'],
                             ],
                             'children' => self::prepareNestedData(
                                 $data,
@@ -135,10 +145,10 @@ class FullTreeDataAction extends Action
                         ];
                     } else {
                         $res[] = [
-                            'id' => $row['id'],
-                            'text' => $row[$this->modelLabelAttribute],
+                            'id' => (int)$row['id'],
+                            'text' => Html::encode($name),
                             'a_attr' => [
-                                'data-id' => $row['id'],
+                                'data-id' => (int)$row['id'],
                             ],
                             'children' => [],
                             'state' => [
@@ -149,10 +159,10 @@ class FullTreeDataAction extends Action
                     $lft = $row[$this->rightAttribute];
                 } else if ($row[$this->leftAttribute] == 1 && $root !== $currentRoot) {
                     $res[] = [
-                        'id' => $row['id'],
-                        'text' => $row[$this->modelLabelAttribute],
+                        'id' => (int)$row['id'],
+                        'text' => Html::encode($name),
                         'a_attr' => [
-                            'data-id' => $row['id'],
+                            'data-id' => (int)$row['id'],
                         ],
                         'children' => self::prepareNestedData(
                             $data,

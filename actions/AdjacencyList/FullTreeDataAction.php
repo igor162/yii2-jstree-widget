@@ -10,6 +10,8 @@ use yii\caching\TagDependency;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\web\Response;
+use yii\helpers\Html;
+use yii\helpers\HtmlPurifier;
 
 /**
  * Helper action for retrieving tree data for jstree by ajax.
@@ -132,13 +134,17 @@ class FullTreeDataAction extends Action
 
             foreach ($rows as $row) {
                 $parent = ArrayHelper::getValue($row, $this->modelParentAttribute, 0);
+                // Protection against xss
+                $name = ArrayHelper::getValue($row, $this->modelLabelAttribute, 'item');
+                if(Html::encode($name) !== $name){ $name = HtmlPurifier::process($name); }
+                
                 $item = [
                     'id' => ArrayHelper::getValue($row, $this->modelIdAttribute, 0),
-                    'parent' => ($parent) ? $parent : '#',
-                    'text' => ArrayHelper::getValue($row, $this->modelLabelAttribute, 'item'),
+                    'parent' => ($parent) ?(int)$parent : '#',
+                    'text' => Html::encode($name),
                     'a_attr' => [
-                        'data-id' => $row[$this->modelIdAttribute],
-                        'data-parent_id' => $row[$this->modelParentAttribute]
+                        'data-id' => (int)$row[$this->modelIdAttribute],
+                        'data-parent_id' => (int)$row[$this->modelParentAttribute]
                     ],
                 ];
 
