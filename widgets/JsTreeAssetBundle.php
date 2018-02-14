@@ -22,7 +22,7 @@ class JsTreeAssetBundle extends AssetBundle
     /**
      * @inheritdoc
      */
-    public $sourcePath = '@bower/jstree/dist';
+    public $sourcePath = '@vakata/jstree/dist'';
 
     /**
      * @inheritdoc
